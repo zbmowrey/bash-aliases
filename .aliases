@@ -1,0 +1,111 @@
+# General System
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ls='lsd -al'
+
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+
+alias chown='chown --preserve-root'
+alias chmod='chmod --preserve-root'
+alias chgrp='chgrp --preserve-root'
+
+alias update='sudo apt-get update && sudo apt-get upgrade'
+
+# Docker
+alias down='docker-compose down --remove-orphans'
+alias up='docker-compose up -d'
+
+# Terraform
+alias tfaa='terraform apply --auto-approve'
+alias tfda='terraform destroy --auto-approve'
+alias tws='terraform workspace select'
+alias kics="docker run -t -v $(pwd):/path checkmarx/kics:latest scan -p /path -o \"/path/\" -e \"../../path/.terraform/*\""
+
+# Laravel Sail
+alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
+
+# AWS
+alias gci='aws sts get-caller-identity'
+
+function ap() {
+    local config_file="$HOME/.aws/config"
+    local login=false
+    local user_input
+
+    # Check arguments
+    for arg in "$@"; do
+        if [ "$arg" == "-l" ]; then
+            login=true
+        else
+            user_input="$arg"
+        fi
+    done
+
+    # Extract profiles from the AWS config file as they appear
+    local profiles=($(grep '^\[profile ' "$config_file" | sed -e 's/\[profile //' -e 's/\]//'))
+
+    # If user_input matches one of the profiles directly, skip the listing and prompt
+    if [[ " ${profiles[@]} " =~ " ${user_input} " ]]; then
+        : # Do nothing, continue with the rest of the logic
+    else
+        # If user_input is numeric, verify it's a valid index
+        if [[ "$user_input" =~ ^[0-9]+$ ]] && [ "$user_input" -ge 1 ] && [ "$user_input" -le "${#profiles[@]}" ]; then
+            user_input="${profiles[$user_input-1]}"
+        else
+            # List profiles in a columnar format
+            echo -e "Number\tProfile"
+            echo -e "------\t-------"
+            local idx=1
+            for profile in "${profiles[@]}"; do
+                echo -e "$idx\t$profile"
+                idx=$((idx + 1))
+            done
+
+            # Prompt user for input
+            read -p "Select a profile by number or name (or 'q' to quit): " user_input
+
+            # Check if user wants to quit
+            if [[ "$user_input" == 'q' || "$user_input" == 'Q' ]]; then
+                echo "Operation aborted."
+                return
+            fi
+
+            # If input is numeric, convert it to corresponding profile name
+            if [[ "$user_input" =~ ^[0-9]+$ ]] && [ "$user_input" -ge 1 ] && [ "$user_input" -le "${#profiles[@]}" ]; then
+                user_input="${profiles[$user_input-1]}"
+            fi
+        fi
+    fi
+
+    # Ensure the final user_input is a valid profile
+    if [[ ! " ${profiles[@]} " =~ " ${user_input} " ]]; then
+        echo "Invalid selection. Please select a valid profile."
+        return 1
+    fi
+
+    # Set the AWS_PROFILE environment variable
+    export AWS_PROFILE="$user_input"
+
+    # If -l flag is provided, trigger the aws sso login command
+    if [ "$login" = true ]; then
+        aws sso login
+    else
+        echo "Selected profile: $AWS_PROFILE"
+    fi
+}
+
+function nah () {
+    # Check if we're inside a git repository
+    if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+        git reset --hard
+        git clean -df
+        if [ -d ".git/rebase-apply" ] || [ -d ".git/rebase-merge" ]; then
+            git rebase --abort
+        fi
+    else
+        # Not in a git repository, do nothing and return status 0
+        return 0
+    fi
+}
