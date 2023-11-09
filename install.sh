@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# NOTE: You need to SOURCE this file, if you want to take immediate advantage of new aliases.
+# you can do that in the following ways:
+
+# . install.sh ...OR...
+# source install.sh
+
+# If you execute it, you'll need to source ~/.aliases yourself, or restart your shell.
+
 # Function to check and ensure ~/.alias_storage directory exists
 function ensure_alias_storage_exists() {
   if [ ! -d "$HOME/.alias_storage" ]; then
