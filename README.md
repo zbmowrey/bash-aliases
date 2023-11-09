@@ -6,7 +6,7 @@ You can do this a few ways:
 2. . install.sh (this will backup your current .aliases if it exists, then install mine).
 3. source install.sh (just another way to do step 2). 
 
-## What install.sh
+## What install.sh does...
 
 1. Snapshots your current .aliases file in the .alias_storage/previous/(timestamp) file.
 2. Installs .aliases from this repo to $HOME/.aliases. 
