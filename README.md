@@ -16,12 +16,12 @@ You can do this a few ways:
 
 If it seems unsafe for us to proceed, you should be presented with an option to confirm: 
 
-- ~/.alias_storage/latest doesn't exist. This could happen if you've never run the tool before. 
-- Hash mismatch between ~/.alias_storage/latest and ~/.aliases. This makes it seem like you've manually changed
-something in ~/.aliases, and those changes would be lost if we proceed. 
+- $HOME/.alias_storage/latest doesn't exist. This could happen if you've never run the tool before. 
+- Hash mismatch between $HOME/.alias_storage/latest and $HOME/.aliases. This makes it seem like you've manually changed
+something in $HOME/.aliases, and those changes would be lost if we proceed. 
 
 ## Break Glass in Case of Emergency
 
-In all cases, we copy your ~/.aliases file to ~/.alias_storage/previous/(timestamp) as a historical
+In all cases, we copy your $HOME/.aliases file to $HOME/.alias_storage/previous/(timestamp) as a historical
 record before we make any other changes. This means you should have a full history of file contents
 from each time the install.sh has been run. 
