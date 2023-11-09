@@ -1,15 +1,31 @@
+# Typo Awareness
+alias claer='clear'
+
+# Convenience
+alias histg='history | grep'
+
+
 # General System
 alias ..='cd ..'
 alias ...='cd ../..'
+alias ....='cd ../../..'
+
 alias ls='lsd -al'
+alias mv='mv -i'
+alias cp='cp -i'
+alias ln='ln -i'
+alias mkdir='mkdir -pv'
+
+alias chown='chown --preserve-root'
+alias chmod='chmod --preserve-root'
+alias chgrp='chgrp --preserve-root'
+alias rm='rm -I --preserve-root'
 
 alias grep='grep --color=auto'
 alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
 
-alias chown='chown --preserve-root'
-alias chmod='chmod --preserve-root'
-alias chgrp='chgrp --preserve-root'
+alias ping='ping -c 5'
 
 alias update='sudo apt-get update && sudo apt-get upgrade'
 
