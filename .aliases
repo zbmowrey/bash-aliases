@@ -39,8 +39,12 @@ alias tfda='terraform destroy --auto-approve'
 alias tws='terraform workspace select'
 alias kics="docker run -t -v $(pwd):/path checkmarx/kics:latest scan -p /path -o \"/path/\" -e \"../../path/.terraform/*\""
 
-# Laravel Sail
+# Laravel
 alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
+function laravel_new() {
+    curl -s "https://laravel.build/$1" | bash
+}
+
 
 # AWS
 alias gci='aws sts get-caller-identity'
