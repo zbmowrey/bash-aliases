@@ -41,6 +41,9 @@ alias kics="docker run -t -v $(pwd):/path checkmarx/kics:latest scan -p /path -o
 
 # Laravel
 alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
+alias composer='sail composer'
+alias artisan='sail artisan'
+
 function laravel_new() {
     curl -s "https://laravel.build/$1" | bash
 }
