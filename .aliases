@@ -39,16 +39,6 @@ alias tfda='terraform destroy --auto-approve'
 alias tws='terraform workspace select'
 alias kics="docker run -t -v $(pwd):/path checkmarx/kics:latest scan -p /path -o \"/path/\" -e \"../../path/.terraform/*\""
 
-# Laravel
-alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
-alias composer='sail composer'
-alias artisan='sail artisan'
-
-function laravel_new() {
-    curl -s "https://laravel.build/$1" | bash
-}
-
-
 # AWS
 alias gci='aws sts get-caller-identity'
 
@@ -132,3 +122,82 @@ function nah () {
         return 0
     fi
 }
+
+# Laravel
+# alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
+
+function laravel() {
+
+    LARAVEL_IMAGE="laravel:latest"
+    LARAVEL_DOCKERFILE_DIR="$HOME/code/laravel/"
+    LARAVEL_DOCKERFILE_PATH="$LARAVEL_DOCKERFILE_DIR/Dockerfile"
+
+    # Check if a docker image tagged 'laravel' exists
+    if ! docker images | grep -q "$LARAVEL_IMAGE"; then
+        echo "Laravel Docker image not found. Checking for Dockerfile."
+
+        # Check if the Dockerfile exists
+        if [ ! -f "$LARAVEL_DOCKERFILE_PATH" ]; then
+            echo "Dockerfile not found. Creating Dockerfile."
+
+            # Create the directory if it doesn't exist
+            mkdir -p "$LARAVEL_DOCKERFILE_DIR"
+
+            # Create the Dockerfile with the specified content
+            cat <<EOF > "$LARAVEL_DOCKERFILE_PATH"
+# Use the composer image as the base
+FROM composer:latest
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Install Laravel Installer
+RUN composer global require laravel/installer
+
+# Update PATH to include the composer global bin directory
+ENV PATH="/tmp/vendor/bin:\${PATH}"
+
+# Use shell form for entrypoint to leverage the shell's ability to resolve PATH
+ENTRYPOINT ["/tmp/vendor/bin/laravel"]
+
+# Default command
+CMD ["--help"]
+EOF
+        fi
+
+        # Build the Docker image
+        echo "Building Docker image."
+        docker build -t $LARAVEL_IMAGE "$LARAVEL_DOCKERFILE_DIR"
+        echo "Docker image built and tagged as 'laravel'."
+    else
+        echo "Found existing Laravel Docker image."
+    fi
+
+    echo "Running Docker container."
+    docker run -it -v "$(pwd):/app" -u $(id -u):$(id -g) laravel "$@"
+}
+
+
+
+function sail() {
+    if [ ! -f composer.json ]; then
+        echo "composer.json not found. This does not appear to be a Laravel project."
+        return 1
+    fi
+
+    if [ ! -f docker-compose.yml ] || [ ! -f ./vendor/bin/sail ]; then
+        echo "Laravel Sail Not Found. Installing..."
+
+        # Install Laravel Sail using composer
+
+        docker run -v "$(pwd):/app" -u $(id -u):$(id -g) composer:latest require laravel/sail --no-interaction
+        docker run -it -v "$(pwd):/app" -u $(id -u):$(id -g) composer:latest php artisan sail:install
+    fi
+
+    # Run ./vendor/bin/sail with any passed arguments
+    echo "Running ./vendor/bin/sail with provided arguments."
+    ./vendor/bin/sail "$@"
+}
+
+alias composer='sail composer'
+alias artisan='sail artisan'
