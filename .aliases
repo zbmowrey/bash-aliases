@@ -185,13 +185,15 @@ function sail() {
         return 1
     fi
 
+    if ! docker volume ls | grep -q "composer-cache"; then
+        echo "Creating 'composer-cache' Docker volume..."
+        docker volume create composer-cache
+    fi
+
     if [ ! -f docker-compose.yml ] || [ ! -f ./vendor/bin/sail ]; then
         echo "Laravel Sail Not Found. Installing..."
-
-        # Install Laravel Sail using composer
-
-        docker run -v "$(pwd):/app" -u $(id -u):$(id -g) composer:latest require laravel/sail --no-interaction
-        docker run -it -v "$(pwd):/app" -u $(id -u):$(id -g) composer:latest php artisan sail:install
+        composer require laravel/sail --no-interaction
+        composer php artisan sail:install --with=pgsql,redis,mailpit,selenium,soketi
     fi
 
     # Run ./vendor/bin/sail with any passed arguments
@@ -199,5 +201,33 @@ function sail() {
     ./vendor/bin/sail "$@"
 }
 
-alias composer='sail composer'
+function composer() {
+    if [ ! -f composer.json ]; then
+        echo "Missing composer.json. Is this a Laravel project?"
+        return 1
+    fi
+
+    if [ -f ./vendor/bin/sail ]; then
+        echo "Running in Sail:"
+        ./vendor/bin/sail composer "$@"
+        return $?
+    else
+      echo "Running in Docker:"
+      if ! docker volume ls | grep -q "composer-cache"; then
+          docker volume create composer-cache
+      fi
+      docker run -it -v "$(pwd):/app" -v composer-cache:/root/.composer -u $(id -u):$(id -g) composer:latest "$@"
+      return $?
+    fi
+}
+
+function laravel_defaults() {
+  composer require-dev laravel/telescope
+  artisan telescope:install
+  artisan migrate
+
+  composer require laravel/horizon
+  artisan horizon:install
+}
+
 alias artisan='sail artisan'
