@@ -131,7 +131,8 @@ function nah () {
 }
 
 # Laravel
-# alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
+
+alias artisan='sail artisan'
 
 function laravel() {
 
@@ -229,12 +230,12 @@ function composer() {
 }
 
 function laravel_defaults() {
-  composer require-dev laravel/telescope
+  composer require laravel/telescope --dev
   artisan telescope:install
-  artisan migrate
 
   composer require laravel/horizon
   artisan horizon:install
+
+  artisan migrate
 }
 
-alias artisan='sail artisan'
