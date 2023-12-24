@@ -37,7 +37,9 @@ alias up='docker-compose up -d'
 alias tfaa='terraform apply --auto-approve'
 alias tfda='terraform destroy --auto-approve'
 alias tws='terraform workspace select'
-alias kics="docker run -t -v $(pwd):/path checkmarx/kics:latest scan -p /path -o \"/path/\" -e \"../../path/.terraform/*\""
+alias tfmt='terraform fmt -recursive -diff -check'
+alias kics='docker run -t -v "$(pwd)":/path checkmarx/kics:latest scan -p /path -o "/path/" -e "../../path/.terraform/*"'
+
 
 # AWS
 alias gci='aws sts get-caller-identity'
@@ -57,11 +59,14 @@ function ap() {
     done
 
     # Extract profiles from the AWS config file as they appear
+    # shellcheck disable=SC2207
     local profiles=($(grep '^\[profile ' "$config_file" | sed -e 's/\[profile //' -e 's/\]//'))
 
     # If user_input matches one of the profiles directly, skip the listing and prompt
-    if [[ " ${profiles[@]} " =~ " ${user_input} " ]]; then
+    profiles_string=$(IFS=" "; echo "${profiles[*]}")
+    if [[ " ${profiles_string} " =~ ${user_input} ]]; then
         : # Do nothing, continue with the rest of the logic
+
     else
         # If user_input is numeric, verify it's a valid index
         if [[ "$user_input" =~ ^[0-9]+$ ]] && [ "$user_input" -ge 1 ] && [ "$user_input" -le "${#profiles[@]}" ]; then
@@ -77,7 +82,7 @@ function ap() {
             done
 
             # Prompt user for input
-            read -p "Select a profile by number or name (or 'q' to quit): " user_input
+            read -pr "Select a profile by number or name (or 'q' to quit): " user_input
 
             # Check if user wants to quit
             if [[ "$user_input" == 'q' || "$user_input" == 'Q' ]]; then
@@ -93,7 +98,9 @@ function ap() {
     fi
 
     # Ensure the final user_input is a valid profile
-    if [[ ! " ${profiles[@]} " =~ " ${user_input} " ]]; then
+    # shellcheck disable=SC2199
+    profiles_string=$(IFS=" "; echo "${profiles[*]}")
+    if [[ ! ${profiles_string} =~ ${user_input} ]]; then
         echo "Invalid selection. Please select a valid profile."
         return 1
     fi
@@ -174,7 +181,7 @@ EOF
     fi
 
     echo "Running Docker container."
-    docker run -it -v "$(pwd):/app" -u $(id -u):$(id -g) laravel "$@"
+    docker run -it -v "$(pwd):/app" -u "$(id -u):$(id -g)" laravel "$@"
 }
 
 
@@ -216,7 +223,7 @@ function composer() {
       if ! docker volume ls | grep -q "composer-cache"; then
           docker volume create composer-cache
       fi
-      docker run -it -v "$(pwd):/app" -v composer-cache:/root/.composer -u $(id -u):$(id -g) composer:latest "$@"
+      docker run -it -v "$(pwd):/app" -v composer-cache:/root/.composer -u "$(id -u):$(id -g)" composer:latest "$@"
       return $?
     fi
 }
