@@ -133,6 +133,7 @@ function nah () {
 # Laravel
 
 alias artisan='sail artisan'
+alias pint='sail exec laravel.test ./vendor/bin/pint'
 
 function laravel() {
 
