@@ -29,6 +29,10 @@ alias ping='ping -c 5'
 
 alias update='sudo apt-get update && sudo apt-get upgrade'
 
+# Kubernetes
+
+alias k='kubectl'
+
 # Docker
 alias down='docker-compose down --remove-orphans'
 alias up='docker-compose up -d'
@@ -240,3 +244,8 @@ function laravel_defaults() {
   artisan migrate
 }
 
+alias nexus="cd ~/code/cdi/nexus && sail up -d"
+alias nexus-down="cd ~/code/cdi/nexus && sail down"
+
+alias boco='cd ~/code/boomstick/conductor && sail up -d'
+alias boco-down='cd ~/code/boomstick/conductor && sail down'
